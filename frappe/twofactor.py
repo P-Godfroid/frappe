@@ -9,7 +9,7 @@ import pyotp
 import frappe
 import frappe.defaults
 from frappe import _
-from frappe.permissions import ALL_USER_ROLE
+from frappe.permissions import ALL_USER_ROLE,SYSTEM_USER_ROLE
 from frappe.utils import cint, get_datetime, get_url, time_diff_in_seconds
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.password import decrypt, encrypt
@@ -116,7 +116,7 @@ def two_factor_is_enabled_for_(user):
 
 	if isinstance(user, str):
 		user = frappe.get_doc("User", user)
-	roles = [d.role for d in user.roles or []] + [ALL_USER_ROLE]
+	roles = [d.role for d in user.roles or []] + [ALL_USER_ROLE,SYSTEM_USER_ROLE]
 
 	role_doctype = frappe.qb.DocType("Role")
 	no_of_users = frappe.db.count(
@@ -193,7 +193,14 @@ def get_verification_obj(user, token, otp_secret):
 	verification_method = get_verification_method()
 	verification_obj = None
 	if verification_method == "SMS":
-		verification_obj = process_2fa_for_sms(user, token, otp_secret)
+		#duplicate phone fetch to keep process_2fa_for_sms current parametes
+		phone = frappe.db.get_value("User", user, ["phone", "mobile_no"], as_dict=1)
+		phone = phone.mobile_no or phone.phone
+		#condition to ensure a 2FA code is also sent to users without any phone defined
+		if phone:
+			verification_obj = process_2fa_for_sms(user, token, otp_secret)
+		else:
+			verification_obj = process_2fa_for_email(user, token, otp_secret, otp_issuer)
 	elif verification_method == "OTP App":
 		# check if this if the first time that the user is trying to login. If so, send an email
 		if not get_default(user + "_otplogin"):
