@@ -105,7 +105,7 @@ def send_via_gateway(arg):
 
 	if len(success_list) > 0:
 		args.update(arg)
-		if frappe.db.exists("DocType","SMS Log"):
+		if frappe.db.exists("DocType", "SMS Log"):
 			create_sms_log(args, success_list)
 		if arg.get("success_msg"):
 			frappe.msgprint(_("SMS sent successfully"))
