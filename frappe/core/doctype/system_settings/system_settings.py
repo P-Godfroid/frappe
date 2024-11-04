@@ -30,12 +30,11 @@ class SystemSettings(Document):
 		attach_view_link: DF.Check
 		backup_limit: DF.Int
 		bypass_2fa_for_retricted_ip_users: DF.Check
+		bypass_2fa_for_website_users: DF.Check
 		bypass_restrict_ip_check_if_2fa_enabled: DF.Check
 		country: DF.Link | None
 		currency_precision: DF.Literal["", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-		date_format: DF.Literal[
-			"yyyy-mm-dd", "dd-mm-yyyy", "dd/mm/yyyy", "dd.mm.yyyy", "mm/dd/yyyy", "mm-dd-yyyy"
-		]
+		date_format: DF.Literal["yyyy-mm-dd", "dd-mm-yyyy", "dd/mm/yyyy", "dd.mm.yyyy", "mm/dd/yyyy", "mm-dd-yyyy"]
 		default_app: DF.Literal[None]
 		deny_multiple_sessions: DF.Check
 		disable_change_log_notification: DF.Check
@@ -53,9 +52,7 @@ class SystemSettings(Document):
 		enable_telemetry: DF.Check
 		enable_two_factor_auth: DF.Check
 		encrypt_backup: DF.Check
-		first_day_of_the_week: DF.Literal[
-			"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-		]
+		first_day_of_the_week: DF.Literal["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 		float_precision: DF.Literal["", "2", "3", "4", "5", "6", "7", "8", "9"]
 		force_user_to_reset_password: DF.Int
 		force_web_capture_mode_for_uploads: DF.Check
@@ -69,18 +66,7 @@ class SystemSettings(Document):
 		max_auto_email_report_per_user: DF.Int
 		max_file_size: DF.Int
 		minimum_password_score: DF.Literal["2", "3", "4"]
-		number_format: DF.Literal[
-			"#,###.##",
-			"#.###,##",
-			"# ###.##",
-			"# ###,##",
-			"#'###.##",
-			"#, ###.##",
-			"#,##,###.##",
-			"#,###.###",
-			"#.###",
-			"#,###",
-		]
+		number_format: DF.Literal["#,###.##", "#.###,##", "# ###.##", "# ###,##", "#'###.##", "#, ###.##", "#,##,###.##", "#,###.###", "#.###", "#,###"]
 		otp_issuer_name: DF.Data | None
 		password_reset_limit: DF.Int
 		rate_limit_email_link_login: DF.Int
@@ -101,8 +87,8 @@ class SystemSettings(Document):
 	def validate(self):
 		from frappe.twofactor import toggle_two_factor_auth
 
-		enable_password_policy = cint(self.enable_password_policy)
-		minimum_password_score = cint(getattr(self, "minimum_password_score", 0))
+		enable_password_policy = cint(self.enable_password_policy) and True or False
+		minimum_password_score = cint(getattr(self, "minimum_password_score", 0)) or 0
 		if enable_password_policy and minimum_password_score <= 0:
 			frappe.throw(_("Please select Minimum Password Score"))
 		elif not enable_password_policy:
@@ -119,7 +105,12 @@ class SystemSettings(Document):
 					frappe.throw(
 						_("Please setup SMS before setting it as an authentication method, via SMS Settings")
 					)
-			toggle_two_factor_auth(True, roles=["All"])
+			if self.bypass_2fa_for_website_users:
+				toggle_two_factor_auth(False, roles=["All"])
+				toggle_two_factor_auth(True, roles=["Desk User"])
+			else:
+				toggle_two_factor_auth(True, roles=["All"])
+				toggle_two_factor_auth(False, roles=["Desk User"])
 		else:
 			self.bypass_2fa_for_retricted_ip_users = 0
 			self.bypass_restrict_ip_check_if_2fa_enabled = 0
