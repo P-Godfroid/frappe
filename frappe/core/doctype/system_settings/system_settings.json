@@ -50,6 +50,7 @@
   "enable_two_factor_auth",
   "bypass_2fa_for_retricted_ip_users",
   "bypass_restrict_ip_check_if_2fa_enabled",
+  "bypass_2fa_for_website_users",
   "two_factor_method",
   "lifespan_qrcode_image",
   "otp_issuer_name",
@@ -684,12 +685,18 @@
    "fieldname": "use_number_format_from_currency",
    "fieldtype": "Check",
    "label": "Use Number Format from Currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "bypass_2fa_for_website_users",
+   "fieldtype": "Check",
+   "label": "Bypass Two Factor Auth for Website Users"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2024-09-26 16:20:59.417151",
+ "modified": "2024-11-04 08:37:39.782436",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",
