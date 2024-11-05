@@ -11,6 +11,7 @@
   "language",
   "column_break_3",
   "time_zone",
+  "currency",
   "enable_onboarding",
   "setup_complete",
   "disable_document_sharing",
@@ -691,12 +692,19 @@
    "fieldname": "bypass_2fa_for_website_users",
    "fieldtype": "Check",
    "label": "Bypass Two Factor Auth for Website Users"
+  },
+  {
+   "description": "Default display currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2024-11-04 08:37:39.782436",
+ "modified": "2024-11-04 15:51:39.954876",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "System Settings",
